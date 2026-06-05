@@ -9,7 +9,6 @@ import {
 import {
   MainLayout,
   PartnerLayout,
-  AdminLayout,
   MapLayout,
 } from '../shared/components/layout';
 
@@ -37,6 +36,16 @@ import { SettlementHistory } from '../features/settlement-hisotry';
 import { ArtistPage } from '../features/artist-page/pages/artist-page';
 import { SettlementCalculation } from '../features/shop/settlement';
 import { SettlementManagement } from '../features/artist/settlement-management';
+import { AdminLayout } from '../admin-test/components/admin-layout';
+import { AdminDashboard } from '../admin-test/pages/admin-dashboard';
+import { AdminMembers } from '../admin-test/pages/admin-members';
+import { AdminNotices } from '../admin-test/pages/admin-notices';
+import { AdminMap } from '../admin-test/pages/admin-map';
+import { AdminPosts } from '../admin-test/pages/admin-posts';
+import { AdminStories } from '../admin-test/pages/admin-stories';
+import { AdminClasses } from '../admin-test/pages/admin-classes';
+import { AdminArtists } from '../admin-test/pages/admin-artists';
+import { AdminMainSettings } from '../admin-test/pages/admin-main-settings';
 
 export const router = createBrowserRouter([
   {
@@ -177,12 +186,18 @@ export const router = createBrowserRouter([
     element: <ProtectedRoute />,
     children: [
       {
-        element: <RoleGuard allowedRoles={[USER_ROLE.ADMIN]} />,
+        element: <AdminLayout />,
         children: [
-          {
-            element: <AdminLayout />,
-            children: [{ path: ROUTES.ADMIN, element: <ThemeCustomizer /> }],
-          },
+          { path: '/admin', element: <AdminDashboard /> },
+          { path: '/admin/members', element: <AdminMembers /> },
+          { path: '/admin/map', element: <AdminMap /> },
+          { path: '/admin/posts', element: <AdminPosts /> },
+          { path: '/admin/stories', element: <AdminStories /> },
+          { path: '/admin/classes', element: <AdminClasses /> },
+          { path: '/admin/artists', element: <AdminArtists /> },
+          { path: '/admin/notices', element: <AdminNotices /> },
+          { path: '/admin/settings/main', element: <AdminMainSettings /> },
+          { path: '/admin/settings/design', element: <ThemeCustomizer /> },
         ],
       },
     ],
