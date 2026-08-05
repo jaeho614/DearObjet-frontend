@@ -11,3 +11,5 @@ export type { InputProps } from './input';
 
 export { SelectBox } from './selectbox';
 export type { SelectBoxProps } from './selectbox';
+
+export { ToggleSwitch } from './toggleswitch';
