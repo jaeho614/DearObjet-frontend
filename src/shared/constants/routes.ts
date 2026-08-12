@@ -1,26 +1,13 @@
 export const ROUTES = {
   // ─── Public ───────────────────────────────────────────
-  // home
   HOME: '/',
-
-  // notices
   NOTICES: '/notices',
   NOTICE_DETAIL: '/notices/:noticeId',
-
-  // map
   MAP: '/map',
   MAP_DETAIL: '/map/:shopId',
-
-  // posts
   POSTS: '/posts',
-
-  // artists
   ARTISTS: '/artists',
-
-  // payment
   PAYMENT: '/payment',
-
-  // signup
   SIGNUP: '/signup',
 
   // ─── Auth ─────────────────────────────────────────────
@@ -30,74 +17,45 @@ export const ROUTES = {
   MY: '/my',
 
   // ─── Shop (/shop) ─────────────────────────────────────
-  // shop_dashboard
   SHOP_DASHBOARD: '/shop/dashboard',
-
-  // manage
   SHOP_MANAGE: '/shop/manage',
   SHOP_MANAGE_RESERVATIONS: '/shop/manage/reservations',
-
-  // artists
   SHOP_ARTISTS: '/shop/artists',
-
-  // shop_inventory
   SHOP_INVENTORY: '/shop/inventory',
-
-  // shop_contracts
   SHOP_CONTRACTS: '/shop/contracts',
-
-  // shop_settlements
   SHOP_SETTLEMENT_CALCULATION: '/shop/settlement-calculation',
   SHOP_SETTLEMENT_HISTORY: '/shop/settlement/history',
-
-  // shop_messages
   SHOP_MESSAGES: '/shop/messages',
-
-  // shop_profile
   SHOP_PROFILE: '/shop/profile',
-
-  // shop_notices
   SHOP_NOTICES: '/shop/notices',
   SHOP_NOTICE_DETAIL: '/shop/notices/:noticeId',
-
-  // shop_settings
   SHOP_SETTINGS: '/shop/settings',
 
   // ─── Artist (/artist) ─────────────────────────────────
-  // artist_dashboard
   ARTIST_DASHBOARD: '/artist/dashboard',
-
-  // artist_inventory
   ARTIST_INVENTORY: '/artist/inventory',
-
-  // artist_contracts
   ARTIST_CONTRACTS: '/artist/contracts',
-
-  // shop
   ARTIST_SHOPS: '/artist/shops',
-
-  // artist_shipments
   ARTIST_SHIPMENTS: '/artist/shipments',
-
-  // artist_settlements
   ARTIST_SETTLEMENT_MANAGEMENT: '/artist/settlement-management',
   ARTIST_SETTLEMENTS_HISTORY: '/artist/settlements/history',
-
-  // artist_messages
   ARTIST_MESSAGES: '/artist/messages',
-
-  // artist_profile
   ARTIST_PROFILE: '/artist/profile',
-
-  // artist_notices
   ARTIST_NOTICES: '/artist/notices',
   ARTIST_NOTICE_DETAIL: '/artist/notices/:noticeId',
-
-  // artist_settings
   ARTIST_SETTINGS: '/artist/settings',
 
-  // ─── Admin ────────────────────────────────────────────
+  // ─── Admin (/admin) ───────────────────────────────────
   ADMIN: '/admin',
+  ADMIN_MEMBERS: '/admin/members',
+  ADMIN_MAP: '/admin/map',
+  ADMIN_POSTS: '/admin/posts',
+  ADMIN_STORIES: '/admin/stories',
+  ADMIN_CLASSES: '/admin/classes',
+  ADMIN_ARTISTS: '/admin/artists',
+  ADMIN_NOTICES: '/admin/notices',
+  ADMIN_SETTINGS_MAIN: '/admin/settings/main',
+  ADMIN_SETTINGS_DESIGN: '/admin/settings/design',
 
   // ─── Footer ───────────────────────────────────────────
   ABOUT: '/about',
