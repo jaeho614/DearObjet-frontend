@@ -1,5 +1,5 @@
 import { useLocation } from 'react-router';
-import { ADMIN_ROUTE_LABELS } from '../constants/admin-route-labels';
+import { ADMIN_ROUTE_LABELS } from '../../../shared/constants/layout';
 
 export const AdminHeader = () => {
   const location = useLocation();

@@ -56,6 +56,7 @@ export const ROUTES = {
   ADMIN_NOTICES: '/admin/notices',
   ADMIN_SETTINGS_MAIN: '/admin/settings/main',
   ADMIN_SETTINGS_DESIGN: '/admin/settings/design',
+  ADMIN_MESSAGES: '/admin/messages',
 
   // ─── Footer ───────────────────────────────────────────
   ABOUT: '/about',

@@ -15,7 +15,7 @@ import {
 import DearObjectWhiteLogo from '../../../assets/dear-objet-white-logo.svg';
 
 import { AdminAsideTab } from './admin-aside-tab';
-import { ADMIN_ROUTES } from '../constants/admin-constants';
+import { ROUTES } from '../../../shared/constants';
 
 export const AdminAside = () => {
   const navigate = useNavigate();
@@ -72,10 +72,8 @@ export const AdminAside = () => {
         <AdminAsideTab
           icon={LayoutDashboard}
           label="대시보드"
-          className={
-            isActive(ADMIN_ROUTES.DASHBOARD) ? 'text-white' : 'text-[#C1C1C1]'
-          }
-          onClick={() => handleClick(ADMIN_ROUTES.DASHBOARD)}
+          className={isActive(ROUTES.ADMIN) ? 'text-white' : 'text-[#C1C1C1]'}
+          onClick={() => handleClick(ROUTES.ADMIN)}
         />
 
         {/* 회원 */}
@@ -84,9 +82,9 @@ export const AdminAside = () => {
             icon={Users}
             label="회원 관리"
             className={
-              isActive(ADMIN_ROUTES.MEMBERS) ? 'text-white' : 'text-[#C1C1C1]'
+              isActive(ROUTES.ADMIN_MEMBERS) ? 'text-white' : 'text-[#C1C1C1]'
             }
-            onClick={() => handleClick(ADMIN_ROUTES.MEMBERS)}
+            onClick={() => handleClick(ROUTES.ADMIN_MEMBERS)}
           />
         </div>
 
@@ -96,41 +94,41 @@ export const AdminAside = () => {
             icon={MapPin}
             label="지도/소품샵 등록"
             className={
-              isActive(ADMIN_ROUTES.MAP) ? 'text-white' : 'text-[#C1C1C1]'
+              isActive(ROUTES.ADMIN_MAP) ? 'text-white' : 'text-[#C1C1C1]'
             }
-            onClick={() => handleClick(ADMIN_ROUTES.MAP)}
+            onClick={() => handleClick(ROUTES.ADMIN_MAP)}
           />
           <AdminAsideTab
             icon={FileText}
             label="포스트 관리"
             className={
-              isActive(ADMIN_ROUTES.POSTS) ? 'text-white' : 'text-[#C1C1C1]'
+              isActive(ROUTES.ADMIN_POSTS) ? 'text-white' : 'text-[#C1C1C1]'
             }
-            onClick={() => handleClick(ADMIN_ROUTES.POSTS)}
+            onClick={() => handleClick(ROUTES.ADMIN_POSTS)}
           />
           <AdminAsideTab
             icon={Image}
             label="스토리 관리"
             className={
-              isActive(ADMIN_ROUTES.STORIES) ? 'text-white' : 'text-[#C1C1C1]'
+              isActive(ROUTES.ADMIN_STORIES) ? 'text-white' : 'text-[#C1C1C1]'
             }
-            onClick={() => handleClick(ADMIN_ROUTES.STORIES)}
+            onClick={() => handleClick(ROUTES.ADMIN_STORIES)}
           />
           <AdminAsideTab
             icon={CalendarDays}
             label="클래스 관리"
             className={
-              isActive(ADMIN_ROUTES.CLASSES) ? 'text-white' : 'text-[#C1C1C1]'
+              isActive(ROUTES.ADMIN_CLASSES) ? 'text-white' : 'text-[#C1C1C1]'
             }
-            onClick={() => handleClick(ADMIN_ROUTES.CLASSES)}
+            onClick={() => handleClick(ROUTES.ADMIN_CLASSES)}
           />
           <AdminAsideTab
             icon={UserCheck}
             label="작가 관리"
             className={
-              isActive(ADMIN_ROUTES.ARTISTS) ? 'text-white' : 'text-[#C1C1C1]'
+              isActive(ROUTES.ADMIN_ARTISTS) ? 'text-white' : 'text-[#C1C1C1]'
             }
-            onClick={() => handleClick(ADMIN_ROUTES.ARTISTS)}
+            onClick={() => handleClick(ROUTES.ADMIN_ARTISTS)}
           />
         </div>
       </nav>
@@ -142,29 +140,29 @@ export const AdminAside = () => {
           icon={Megaphone}
           label="공지사항 관리"
           className={
-            isActive(ADMIN_ROUTES.NOTICES) ? 'text-white' : 'text-[#C1C1C1]'
+            isActive(ROUTES.ADMIN_NOTICES) ? 'text-white' : 'text-[#C1C1C1]'
           }
-          onClick={() => handleClick(ADMIN_ROUTES.NOTICES)}
+          onClick={() => handleClick(ROUTES.ADMIN_NOTICES)}
         />
         <AdminAsideTab
           icon={Settings}
           label="메인 페이지 설정"
           className={
-            isActive(ADMIN_ROUTES.MAIN_SETTINGS)
+            isActive(ROUTES.ADMIN_SETTINGS_MAIN)
               ? 'text-white'
               : 'text-[#C1C1C1]'
           }
-          onClick={() => handleClick(ADMIN_ROUTES.MAIN_SETTINGS)}
+          onClick={() => handleClick(ROUTES.ADMIN_SETTINGS_MAIN)}
         />
         <AdminAsideTab
           icon={Settings}
           label="디자인 설정"
           className={
-            isActive(ADMIN_ROUTES.DESIGN_SETTINGS)
+            isActive(ROUTES.ADMIN_SETTINGS_DESIGN)
               ? 'text-white'
               : 'text-[#C1C1C1]'
           }
-          onClick={() => handleClick(ADMIN_ROUTES.DESIGN_SETTINGS)}
+          onClick={() => handleClick(ROUTES.ADMIN_SETTINGS_DESIGN)}
         />
       </section>
     </aside>

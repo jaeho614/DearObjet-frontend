@@ -1,7 +1,7 @@
 import { type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import { X } from 'lucide-react';
-import { ADMIN_ROUTES } from '../../constants/admin-constants';
+import { ROUTES } from '../../../../shared/constants';
 
 type UserRole = 'CUSTOMER' | 'ARTIST' | 'SHOP' | 'TEMP' | 'ADMIN';
 type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
@@ -244,7 +244,7 @@ export const MemberDetailModal = ({
             {/* 공통: 포스트 보기 */}
             <button
               type="button"
-              onClick={() => handleNavigate(ADMIN_ROUTES.POSTS)}
+              onClick={() => handleNavigate(ROUTES.ADMIN_POSTS)}
               className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
             >
               포스트 보기
@@ -255,21 +255,21 @@ export const MemberDetailModal = ({
               <>
                 <button
                   type="button"
-                  onClick={() => handleNavigate(ADMIN_ROUTES.STORIES)}
+                  onClick={() => handleNavigate(ROUTES.ADMIN_STORIES)}
                   className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
                 >
                   스토리 보기
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleNavigate(ADMIN_ROUTES.CLASSES)}
+                  onClick={() => handleNavigate(ROUTES.ADMIN_CLASSES)}
                   className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
                 >
                   클래스 보기
                 </button>
                 <button
                   type="button"
-                  onClick={() => handleNavigate(ADMIN_ROUTES.MAP)}
+                  onClick={() => handleNavigate(ROUTES.ADMIN_MAP)}
                   className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
                 >
                   소품샵 위치 보기
@@ -281,7 +281,7 @@ export const MemberDetailModal = ({
             {member.role === 'ARTIST' && (
               <button
                 type="button"
-                onClick={() => handleNavigate(ADMIN_ROUTES.ARTISTS)}
+                onClick={() => handleNavigate(ROUTES.ADMIN_ARTISTS)}
                 className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
               >
                 작가 보기
