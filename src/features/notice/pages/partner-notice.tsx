@@ -11,11 +11,14 @@ export const PartnerNotice = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [selectedNoticeId, setSelectedNoticeId] = useState<number | null>(null);
 
-  const { data } = useGetNoticesQuery({
-    target: 'ARTIST_SHOP',
-    category: selectedCategory,
-    page: currentPage,
-  });
+  const { data } = useGetNoticesQuery(
+    {
+      target: 'ARTIST_SHOP',
+      category: selectedCategory,
+      page: currentPage,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
   const noticeData = data?.items.map(toNoticeItem) ?? [];
   const totalPages = data?.totalPages ?? 1;

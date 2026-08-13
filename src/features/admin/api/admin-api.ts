@@ -11,6 +11,12 @@ import type {
 } from '../admin-members/types/admin-members-types';
 import type { AdminPostListResponse } from '../admin-posts/types/admin-post-types';
 import type { PostDetail } from '../../post/types/post-type';
+import type {
+  NoticeCreateRequest,
+  NoticeItem,
+  NoticeListResponse,
+  NoticeUpdateRequest,
+} from '../admin-notices/types/admin-notices-types';
 
 export const adminApi = createApi({
   reducerPath: 'adminApi',
@@ -107,6 +113,72 @@ export const adminApi = createApi({
       }),
       invalidatesTags: ['AdminPost'],
     }),
+
+    getAdminNotices: builder.query<
+      NoticeListResponse,
+      {
+        target?: string;
+        category?: string;
+        keyword?: string;
+        page?: number;
+        size?: number;
+      }
+    >({
+      query: ({ target, category, keyword, page = 1, size = 10 }) => {
+        const params = new URLSearchParams({
+          page: String(page),
+          size: String(size),
+        });
+        if (target) params.set('target', target);
+        if (category) params.set('category', category);
+        if (keyword) params.set('keyword', keyword);
+        return `/api/v1/admin/notices?${params.toString()}`;
+      },
+      transformResponse: (res: ApiResponse<NoticeListResponse>) => res.data,
+      providesTags: ['AdminNotice'],
+    }),
+
+    getAdminNotice: builder.query<NoticeItem, number>({
+      query: (noticeId) => `/api/v1/admin/notices/${noticeId}`,
+      transformResponse: (res: ApiResponse<NoticeItem>) => res.data,
+      providesTags: (result, error, noticeId) => [
+        { type: 'AdminNotice', id: noticeId },
+      ],
+    }),
+
+    createAdminNotice: builder.mutation<NoticeItem, NoticeCreateRequest>({
+      query: (body) => ({
+        url: '/api/v1/admin/notices',
+        method: 'POST',
+        body,
+      }),
+      transformResponse: (res: ApiResponse<NoticeItem>) => res.data,
+      invalidatesTags: ['AdminNotice'],
+    }),
+
+    updateAdminNotice: builder.mutation<
+      NoticeItem,
+      { noticeId: number; body: NoticeUpdateRequest }
+    >({
+      query: ({ noticeId, body }) => ({
+        url: `/api/v1/admin/notices/${noticeId}`,
+        method: 'PUT',
+        body,
+      }),
+      transformResponse: (res: ApiResponse<NoticeItem>) => res.data,
+      invalidatesTags: (result, error, { noticeId }) => [
+        { type: 'AdminNotice', id: noticeId },
+        'AdminNotice',
+      ],
+    }),
+
+    deleteAdminNotice: builder.mutation<void, number>({
+      query: (noticeId) => ({
+        url: `/api/v1/admin/notices/${noticeId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['AdminNotice'],
+    }),
   }),
 });
 
@@ -119,4 +191,9 @@ export const {
   useGetAdminPostQuery,
   useUpdatePostBlindedMutation,
   useDeleteAdminPostMutation,
+  useGetAdminNoticesQuery,
+  useGetAdminNoticeQuery,
+  useCreateAdminNoticeMutation,
+  useUpdateAdminNoticeMutation,
+  useDeleteAdminNoticeMutation,
 } = adminApi;

@@ -13,11 +13,14 @@ export const CustomerNotice = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const { data } = useGetNoticesQuery({
-    target: 'USER',
-    category: selectedCategory,
-    page: currentPage,
-  });
+  const { data } = useGetNoticesQuery(
+    {
+      target: 'USER',
+      category: selectedCategory,
+      page: currentPage,
+    },
+    { refetchOnMountOrArgChange: true }
+  );
 
   const noticeData = data?.items.map(toNoticeItem) ?? [];
   const totalPages = data?.totalPages ?? 1;
