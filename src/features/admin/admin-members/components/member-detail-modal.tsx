@@ -1,101 +1,53 @@
-import { type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import { X } from 'lucide-react';
-import { ROUTES } from '../../../../shared/constants';
 
-type UserRole = 'CUSTOMER' | 'ARTIST' | 'SHOP' | 'TEMP' | 'ADMIN';
-type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
+import { ROUTES, type UserStatus } from '../../../../shared/constants';
 
-interface UserBase {
-  userId: number;
-  email: string;
-  name: string;
-  phoneNumber: string | null;
-  profileUrl: string | null;
-  role: UserRole;
-  socialId: string | null;
-  userStatus: UserStatus;
-  marketingAgreement: boolean;
-  smsAgreement: boolean;
-  createdAt: string;
-  updatedAt: string;
-  withdrawalRequestedAt: string | null;
-}
-
-interface ArtistProfile {
-  artistsId: number;
-  businessProfileId: number | null;
-  userId: number;
-  instagramId: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface ShopProfile {
-  shopId: number;
-  shopName: string;
-  shopDescription: string | null;
-  businessProfileId: number | null;
-  userId: number;
-  instagramId: string | null;
-  latitude: number | null;
-  longitude: number | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface MemberDetail extends UserBase {
-  artistProfile?: ArtistProfile;
-  shopProfile?: ShopProfile;
-}
-
-interface MemberDetailModalProps {
-  member: MemberDetail;
-  onClose: () => void;
-}
-
-const ROLE_STYLE: Record<UserRole, string> = {
-  CUSTOMER: 'bg-blue-50 text-blue-600',
-  ARTIST: 'bg-purple-50 text-purple-600',
-  SHOP: 'bg-emerald-50 text-emerald-600',
-  TEMP: 'bg-gray-100 text-gray-500',
-  ADMIN: 'bg-red-50 text-red-500',
-};
-
-const STATUS_STYLE: Record<UserStatus, string> = {
-  ACTIVE: 'text-emerald-500',
-  INACTIVE: 'text-gray-400',
-  SUSPENDED: 'text-red-400',
-};
-
-const STATUS_LABEL: Record<UserStatus, string> = {
-  ACTIVE: '활성',
-  INACTIVE: '비활성',
-  SUSPENDED: '정지',
-};
-
-interface InfoRowProps {
-  label: string;
-  value: ReactNode;
-}
-
-const InfoRow = ({ label, value }: InfoRowProps) => (
-  <div className="flex items-start gap-3 border-b border-gray-50 py-2 last:border-0">
-    <span className="w-32 shrink-0 text-xs text-gray-400">{label}</span>
-    <span className="text-xs text-gray-700">{value ?? '-'}</span>
-  </div>
-);
+import {
+  useGetAdminUserQuery,
+  useUpdateUserStatusMutation,
+} from '../../api/admin-api';
+import {
+  ROLE_STYLE,
+  STATUS_LABEL,
+  STATUS_STYLE,
+} from '../constants/admin-members-constants';
+import { InfoRow } from './info-row';
 
 export const MemberDetailModal = ({
-  member,
+  userId,
   onClose,
-}: MemberDetailModalProps) => {
+}: {
+  userId: number;
+  onClose: () => void;
+}) => {
   const navigate = useNavigate();
+  const { data: member, isLoading } = useGetAdminUserQuery(userId);
+  const [updateUserStatus] = useUpdateUserStatusMutation();
 
   const handleNavigate = (route: string) => {
     onClose();
-    navigate(route, { state: { searchKeyword: member.name } });
+    navigate(route, { state: { searchKeyword: member?.name } });
   };
+
+  const handleStatusToggle = async () => {
+    if (!member) return;
+    const isActive = member.status === 'ACTIVE';
+    const nextStatus: UserStatus = isActive ? 'INACTIVE' : 'ACTIVE';
+    const label = isActive ? '비활성화' : '활성화';
+    if (!confirm(`해당 회원을 ${label}하시겠습니까?`)) return;
+    try {
+      await updateUserStatus({
+        userId: member.userId,
+        status: nextStatus,
+      }).unwrap();
+      onClose();
+    } catch {
+      alert('처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  const isWithdrawalPending = member?.status === 'WITHDRAWAL_PENDING';
 
   return (
     <div
@@ -121,174 +73,157 @@ export const MemberDetailModal = ({
 
         {/* 바디 */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
-          {/* 프로필 */}
-          <div className="mb-5 flex items-center gap-4">
-            <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-gray-100">
-              {member.profileUrl ? (
-                <img
-                  src={member.profileUrl}
-                  alt={member.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-lg text-gray-400">
-                  {member.name[0]}
+          {isLoading || !member ? (
+            <p className="py-10 text-center text-sm text-gray-400">
+              불러오는 중...
+            </p>
+          ) : (
+            <>
+              {/* 프로필 */}
+              <div className="mb-5 flex items-center gap-4">
+                <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-gray-100">
+                  {member.profileUrl ? (
+                    <img
+                      src={member.profileUrl}
+                      alt={member.name}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-lg text-gray-400">
+                      {member.name?.[0]}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="font-semibold text-gray-900">{member.name}</p>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] ${ROLE_STYLE[member.role]}`}
-                >
-                  {member.role}
-                </span>
-                <span className={`text-xs ${STATUS_STYLE[member.userStatus]}`}>
-                  {STATUS_LABEL[member.userStatus]}
-                </span>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-gray-900">{member.name}</p>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] ${ROLE_STYLE[member.role]}`}
+                    >
+                      {member.role}
+                    </span>
+                    <span className={`text-xs ${STATUS_STYLE[member.status]}`}>
+                      {STATUS_LABEL[member.status]}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs text-gray-400">{member.email}</p>
+                </div>
               </div>
-              <p className="mt-0.5 text-xs text-gray-400">{member.email}</p>
-            </div>
-          </div>
 
-          {/* 기본 정보 */}
-          <div className="mb-4 rounded-lg bg-gray-50 px-4 py-2">
-            <p className="mb-2 text-xs font-medium text-gray-500">기본 정보</p>
-            <InfoRow label="user_id" value={member.userId} />
-            <InfoRow label="phone_number" value={member.phoneNumber} />
-            <InfoRow label="social_id" value={member.socialId} />
-            <InfoRow
-              label="marketing_agreement"
-              value={member.marketingAgreement ? '동의' : '미동의'}
-            />
-            <InfoRow
-              label="sms_agreement"
-              value={member.smsAgreement ? '동의' : '미동의'}
-            />
-            <InfoRow label="created_at" value={member.createdAt} />
-            <InfoRow label="updated_at" value={member.updatedAt} />
-            <InfoRow
-              label="withdrawal_requested_at"
-              value={member.withdrawalRequestedAt ?? '-'}
-            />
-          </div>
-
-          {/* ARTIST 추가 정보 */}
-          {member.role === 'ARTIST' && member.artistProfile && (
-            <div className="mb-4 rounded-lg bg-purple-50 px-4 py-2">
-              <p className="mb-2 text-xs font-medium text-purple-500">
-                작가 프로필
-              </p>
-              <InfoRow
-                label="artists_id"
-                value={member.artistProfile.artistsId}
-              />
-              <InfoRow
-                label="business_profile_id"
-                value={member.artistProfile.businessProfileId}
-              />
-              <InfoRow
-                label="instagram_id"
-                value={member.artistProfile.instagramId}
-              />
-              <InfoRow
-                label="created_at"
-                value={member.artistProfile.createdAt}
-              />
-              <InfoRow
-                label="updated_at"
-                value={member.artistProfile.updatedAt}
-              />
-            </div>
-          )}
-
-          {/* SHOP 추가 정보 */}
-          {member.role === 'SHOP' && member.shopProfile && (
-            <div className="mb-4 rounded-lg bg-emerald-50 px-4 py-2">
-              <p className="mb-2 text-xs font-medium text-emerald-600">
-                소품샵 프로필
-              </p>
-              <InfoRow label="shop_id" value={member.shopProfile.shopId} />
-              <InfoRow label="shop_name" value={member.shopProfile.shopName} />
-              <InfoRow
-                label="shop_description"
-                value={member.shopProfile.shopDescription}
-              />
-              <InfoRow
-                label="business_profile_id"
-                value={member.shopProfile.businessProfileId}
-              />
-              <InfoRow
-                label="instagram_id"
-                value={member.shopProfile.instagramId}
-              />
-              <InfoRow label="latitude" value={member.shopProfile.latitude} />
-              <InfoRow label="longitude" value={member.shopProfile.longitude} />
-              <InfoRow
-                label="created_at"
-                value={member.shopProfile.createdAt}
-              />
-              <InfoRow
-                label="updated_at"
-                value={member.shopProfile.updatedAt}
-              />
-            </div>
+              {/* 기본 정보 */}
+              <div className="mb-4 rounded-lg bg-gray-50 px-4 py-2">
+                <p className="mb-2 text-xs font-medium text-gray-500">
+                  기본 정보
+                </p>
+                <InfoRow label="user_id" value={member.userId} />
+                <InfoRow label="phone_number" value={member.phoneNumber} />
+                <InfoRow label="social_id" value={member.socialId} />
+                <InfoRow
+                  label="marketing_agreement"
+                  value={member.marketingAgreement ? '동의' : '미동의'}
+                />
+                <InfoRow
+                  label="sms_agreement"
+                  value={member.smsAgreement ? '동의' : '미동의'}
+                />
+                <InfoRow
+                  label="created_at"
+                  value={new Date(member.createdAt).toLocaleDateString('ko-KR')}
+                />
+                <InfoRow
+                  label="updated_at"
+                  value={new Date(member.updatedAt).toLocaleDateString('ko-KR')}
+                />
+                <InfoRow
+                  label="withdrawal_requested_at"
+                  value={
+                    member.withdrawalRequestedAt
+                      ? new Date(
+                          member.withdrawalRequestedAt
+                        ).toLocaleDateString('ko-KR')
+                      : '-'
+                  }
+                />
+              </div>
+            </>
           )}
         </div>
 
-        {/* 하단 버튼 */}
-        <footer className="shrink-0 border-t px-6 py-4">
-          <p className="mb-2 text-xs text-gray-400">관련 콘텐츠 바로가기</p>
-          <div className="flex flex-wrap gap-2">
-            {/* 공통: 포스트 보기 */}
-            <button
-              type="button"
-              onClick={() => handleNavigate(ROUTES.ADMIN_POSTS)}
-              className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
-            >
-              포스트 보기
-            </button>
+        {/* 푸터 */}
+        {member && (
+          <footer className="shrink-0 border-t px-6 py-4">
+            {/* 상태 변경 버튼 */}
+            <div className="mb-3 flex items-center gap-2">
+              {member.status === 'WITHDRAWN' ? null : isWithdrawalPending ? (
+                <button
+                  type="button"
+                  onClick={handleStatusToggle}
+                  className="rounded-md border border-amber-100 px-3 py-1.5 text-xs text-amber-500 hover:bg-amber-50"
+                >
+                  탈퇴 취소
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleStatusToggle}
+                  className={`rounded-md border px-3 py-1.5 text-xs ${
+                    member.status === 'ACTIVE'
+                      ? 'border-red-100 text-red-400 hover:bg-red-50'
+                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {member.status === 'ACTIVE' ? '비활성화' : '활성화'}
+                </button>
+              )}
+            </div>
 
-            {/* SHOP 전용 */}
-            {member.role === 'SHOP' && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => handleNavigate(ROUTES.ADMIN_STORIES)}
-                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
-                >
-                  스토리 보기
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleNavigate(ROUTES.ADMIN_CLASSES)}
-                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
-                >
-                  클래스 보기
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleNavigate(ROUTES.ADMIN_MAP)}
-                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
-                >
-                  소품샵 위치 보기
-                </button>
-              </>
-            )}
-
-            {/* ARTIST 전용 */}
-            {member.role === 'ARTIST' && (
+            {/* 관련 콘텐츠 바로가기 */}
+            <p className="mb-2 text-xs text-gray-400">관련 콘텐츠 바로가기</p>
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => handleNavigate(ROUTES.ADMIN_ARTISTS)}
+                onClick={() => handleNavigate(ROUTES.ADMIN_POSTS)}
                 className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
               >
-                작가 보기
+                포스트 보기
               </button>
-            )}
-          </div>
-        </footer>
+              {member.role === 'SHOP' && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate(ROUTES.ADMIN_STORIES)}
+                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                  >
+                    스토리 보기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate(ROUTES.ADMIN_CLASSES)}
+                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                  >
+                    클래스 보기
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigate(ROUTES.ADMIN_MAP)}
+                    className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                  >
+                    소품샵 위치 보기
+                  </button>
+                </>
+              )}
+              {member.role === 'ARTIST' && (
+                <button
+                  type="button"
+                  onClick={() => handleNavigate(ROUTES.ADMIN_ARTISTS)}
+                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs text-gray-600 hover:bg-gray-50"
+                >
+                  작가 보기
+                </button>
+              )}
+            </div>
+          </footer>
+        )}
       </div>
     </div>
   );

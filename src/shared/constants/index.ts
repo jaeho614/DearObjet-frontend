@@ -4,4 +4,9 @@ export { ROUTES } from './routes';
 
 export { NAV_ITEMS, INFO_LINKS, PARTNER_LINKS, ROUTE_LABELS } from './layout';
 
-export { USER_ROLE, type UserRole } from './user-role';
+export {
+  USER_ROLE,
+  USER_STATUS,
+  type UserRole,
+  type UserStatus,
+} from './user-role';

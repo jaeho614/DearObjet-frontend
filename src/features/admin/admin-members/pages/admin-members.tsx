@@ -1,130 +1,72 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
-import { Input } from '../../../../shared/components/ui';
+
+import { type UserRole } from '../../../../shared/constants';
+import { Button, Input } from '../../../../shared/components/ui';
+
 import {
-  MemberDetailModal,
-  type MemberDetail,
-} from '../components/member-detail-modal';
+  useGetAdminRoleCountsQuery,
+  useGetAdminUsersQuery,
+} from '../../api/admin-api';
+import {
+  ROLE_STYLE,
+  STATUS_LABEL,
+  STATUS_STYLE,
+} from '../constants/admin-members-constants';
+import { MemberDetailModal } from '../components/member-detail-modal';
 
-const MOCK_MEMBERS: MemberDetail[] = [
-  {
-    userId: 1,
-    name: '김지수',
-    email: 'jisoo@gmail.com',
-    role: 'CUSTOMER',
-    phoneNumber: '010-1234-5678',
-    profileUrl: null,
-    socialId: 'kakao_123',
-    userStatus: 'ACTIVE',
-    marketingAgreement: true,
-    smsAgreement: false,
-    createdAt: '2025.08.30',
-    updatedAt: '2025.08.30',
-    withdrawalRequestedAt: null,
-  },
-  {
-    userId: 2,
-    name: '이도윤',
-    email: 'dylee@naver.com',
-    role: 'ARTIST',
-    phoneNumber: '010-9876-5432',
-    profileUrl: null,
-    socialId: 'kakao_456',
-    userStatus: 'ACTIVE',
-    marketingAgreement: false,
-    smsAgreement: false,
-    createdAt: '2025.08.29',
-    updatedAt: '2025.08.29',
-    withdrawalRequestedAt: null,
-    artistProfile: {
-      artistsId: 1,
-      businessProfileId: 10,
-      userId: 2,
-      instagramId: '@dylee_art',
-      createdAt: '2025.08.29',
-      updatedAt: '2025.08.29',
-    },
-  },
-  {
-    userId: 3,
-    name: '솜다람잡화점',
-    email: 'somdaram@shop.com',
-    role: 'SHOP',
-    phoneNumber: '010-5555-1234',
-    profileUrl: null,
-    socialId: 'kakao_789',
-    userStatus: 'ACTIVE',
-    marketingAgreement: true,
-    smsAgreement: true,
-    createdAt: '2025.08.28',
-    updatedAt: '2025.08.28',
-    withdrawalRequestedAt: null,
-    shopProfile: {
-      shopId: 1,
-      shopName: '솜다람잡화점',
-      shopDescription: '패브릭 소품 전문 공방입니다.',
-      businessProfileId: 11,
-      userId: 3,
-      instagramId: '@somdaram',
-      latitude: 37.5665,
-      longitude: 126.978,
-      createdAt: '2025.08.28',
-      updatedAt: '2025.08.28',
-    },
-  },
-];
-
-const ROLE_STYLE: Record<string, string> = {
-  CUSTOMER: 'bg-blue-50 text-blue-600',
-  ARTIST: 'bg-purple-50 text-purple-600',
-  SHOP: 'bg-emerald-50 text-emerald-600',
-};
-
-const STATUS_STYLE: Record<string, string> = {
-  ACTIVE: 'text-emerald-500',
-  INACTIVE: 'text-gray-400',
-  SUSPENDED: 'text-red-400',
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  ACTIVE: '활성',
-  INACTIVE: '비활성',
-  SUSPENDED: '정지',
-};
-
-type RoleFilter = 'ALL' | 'CUSTOMER' | 'ARTIST' | 'SHOP';
+type RoleFilter = 'ALL' | UserRole;
 
 export const AdminMembers = () => {
   const [keyword, setKeyword] = useState('');
+  const [inputValue, setInputValue] = useState('');
   const [roleFilter, setRoleFilter] = useState<RoleFilter>('ALL');
-  const [selectedMember, setSelectedMember] = useState<MemberDetail | null>(
-    null
-  );
+  const [page, setPage] = useState(1);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
-  const filtered = MOCK_MEMBERS.filter((m) => {
-    const matchRole = roleFilter === 'ALL' || m.role === roleFilter;
-    const matchSearch = m.name.includes(keyword) || m.email.includes(keyword);
-    return matchRole && matchSearch;
+  const { data: roleCounts } = useGetAdminRoleCountsQuery();
+  const { data, isLoading, isFetching } = useGetAdminUsersQuery({
+    page,
+    role: roleFilter === 'ALL' ? undefined : roleFilter,
+    keyword: keyword || undefined,
   });
 
-  const counts = {
-    CUSTOMER: MOCK_MEMBERS.filter((m) => m.role === 'CUSTOMER').length,
-    ARTIST: MOCK_MEMBERS.filter((m) => m.role === 'ARTIST').length,
-    SHOP: MOCK_MEMBERS.filter((m) => m.role === 'SHOP').length,
+  useEffect(() => {
+    setPage(1);
+  }, [roleFilter, keyword]);
+
+  const handleSearch = () => {
+    setKeyword(inputValue.trim());
   };
+
+  const users = data?.users ?? [];
+  const totalPages = data?.totalPages ?? 1;
+  const totalCount = data?.totalCount ?? 0;
 
   return (
     <>
       <div className="flex flex-col gap-5">
-        {/* 요약 카드 */}
         <div className="grid grid-cols-3 gap-4">
-          {(
-            [
-              { role: 'CUSTOMER', label: 'CUSTOMER', icon: '👤' },
-              { role: 'ARTIST', label: 'ARTIST', icon: '🎨' },
-              { role: 'SHOP', label: 'SHOP', icon: '🏪' },
-            ] as const
-          ).map(({ role, label, icon }) => (
+          {[
+            {
+              role: 'CUSTOMER' as const,
+              label: 'CUSTOMER',
+              icon: '👤',
+              count: roleCounts?.customerCount ?? 0,
+            },
+            {
+              role: 'ARTIST' as const,
+              label: 'ARTIST',
+              icon: '🎨',
+              count: roleCounts?.artistCount ?? 0,
+            },
+            {
+              role: 'SHOP' as const,
+              label: 'SHOP',
+              icon: '🏪',
+              count: roleCounts?.shopCount ?? 0,
+            },
+          ].map(({ role, label, icon, count }) => (
             <div
               key={role}
               className="flex items-center gap-3 rounded-xl bg-white px-5 py-4"
@@ -136,7 +78,7 @@ export const AdminMembers = () => {
               </div>
               <div>
                 <p className="text-xl font-semibold text-gray-900">
-                  {counts[role].toLocaleString()}
+                  {count.toLocaleString()}
                 </p>
                 <p className="text-xs text-gray-400">{label}</p>
               </div>
@@ -151,7 +93,7 @@ export const AdminMembers = () => {
               <h2 className="font-bold">
                 전체 회원 목록{' '}
                 <span className="font-normal text-blue-500">
-                  {filtered.length}
+                  {totalCount.toLocaleString()}
                 </span>
               </h2>
               <div className="mr-1.5 flex items-center gap-2">
@@ -175,18 +117,26 @@ export const AdminMembers = () => {
                   )}
                 </div>
                 {/* 검색 */}
-                <div className="relative flex items-center">
-                  <Search
-                    className="absolute left-2.5 h-3.5 w-3.5 text-gray-400"
-                    aria-hidden="true"
-                  />
-                  <Input
-                    type="text"
-                    placeholder="이름, 이메일 검색"
-                    value={keyword}
-                    onChange={(e) => setKeyword(e.target.value)}
-                    className="w-48 pl-8 text-xs"
-                    aria-label="회원 검색"
+                <div className="flex items-center gap-2">
+                  <div className="relative flex items-center">
+                    <Search
+                      className="absolute left-2.5 h-3.5 w-3.5 text-gray-400"
+                      aria-hidden="true"
+                    />
+                    <Input
+                      type="text"
+                      placeholder="이름, 이메일 검색"
+                      value={inputValue}
+                      onChange={(e) => setInputValue(e.target.value)}
+                      className="w-48 pl-8 text-xs"
+                      aria-label="회원 검색"
+                    />
+                  </div>
+                  <Button
+                    variant="secondaryLight"
+                    size="small"
+                    label="검색"
+                    onClick={handleSearch}
                   />
                 </div>
               </div>
@@ -217,14 +167,20 @@ export const AdminMembers = () => {
               </tr>
             </thead>
             <tbody className="block min-h-0 flex-1 overflow-y-auto [scrollbar-gutter:stable]">
-              {filtered.length === 0 ? (
+              {isLoading || isFetching ? (
+                <tr className="table w-full">
+                  <td colSpan={6} className="py-10 text-center text-gray-400">
+                    불러오는 중...
+                  </td>
+                </tr>
+              ) : users.length === 0 ? (
                 <tr className="table w-full">
                   <td colSpan={6} className="py-10 text-center text-gray-400">
                     검색 결과가 없습니다.
                   </td>
                 </tr>
               ) : (
-                filtered.map((m) => (
+                users.map((m) => (
                   <tr
                     key={m.userId}
                     className="table w-full table-fixed text-center text-sm transition-colors hover:bg-gray-50"
@@ -239,43 +195,60 @@ export const AdminMembers = () => {
                       </span>
                     </td>
                     <td className="w-[16%] py-2.5 text-xs text-gray-400">
-                      {m.createdAt}
+                      {new Date(m.createdAt).toLocaleDateString('ko-KR')}
                     </td>
                     <td
-                      className={`w-[12%] py-2.5 text-xs ${STATUS_STYLE[m.userStatus]}`}
+                      className={`w-[12%] py-2.5 text-xs ${STATUS_STYLE[m.status]}`}
                     >
-                      {STATUS_LABEL[m.userStatus]}
+                      {STATUS_LABEL[m.status]}
                     </td>
                     <td className="w-[12%] py-2.5">
-                      <div className="flex items-center justify-center gap-1">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedMember(m)}
-                          className="rounded border border-gray-200 px-2 py-1 text-xs text-gray-500 hover:bg-gray-50"
-                        >
-                          열람
-                        </button>
-                        <button
-                          type="button"
-                          className="rounded border border-red-100 px-2 py-1 text-xs text-red-400 hover:bg-red-50"
-                        >
-                          탈퇴
-                        </button>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedUserId(m.userId)}
+                        className="rounded border border-gray-200 px-2 py-1 text-xs text-gray-500 hover:bg-gray-50"
+                      >
+                        열람
+                      </button>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+
+          {/* 페이지네이션 */}
+          {totalPages > 1 && (
+            <div className="flex shrink-0 items-center justify-center gap-1 border-t pt-3">
+              <button
+                type="button"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+                className="rounded border border-gray-200 px-2 py-1 text-xs text-gray-500 hover:bg-gray-50 disabled:opacity-40"
+              >
+                이전
+              </button>
+              <span className="px-3 text-xs text-gray-500">
+                {page} / {totalPages}
+              </span>
+              <button
+                type="button"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+                className="rounded border border-gray-200 px-2 py-1 text-xs text-gray-500 hover:bg-gray-50 disabled:opacity-40"
+              >
+                다음
+              </button>
+            </div>
+          )}
         </section>
       </div>
 
       {/* 모달 */}
-      {selectedMember && (
+      {selectedUserId !== null && (
         <MemberDetailModal
-          member={selectedMember}
-          onClose={() => setSelectedMember(null)}
+          userId={selectedUserId}
+          onClose={() => setSelectedUserId(null)}
         />
       )}
     </>
