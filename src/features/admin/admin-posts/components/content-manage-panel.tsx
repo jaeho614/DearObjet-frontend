@@ -1,36 +1,11 @@
 import { useState } from 'react';
 import { useLocation } from 'react-router';
 import { Search } from 'lucide-react';
+
 import { Button, Input } from '../../../../shared/components/ui';
 
-export interface ContentItem {
-  id: number;
-  title: string;
-  author: string;
-  createdAt: string;
-  status: 'VISIBLE' | 'BLIND';
-  content?: string;
-  imageUrl?: string;
-}
-
-interface ContentManagePanelProps {
-  title: string;
-  items: ContentItem[];
-  isLoading?: boolean;
-  onDelete: (id: number) => void;
-  onBlind: (id: number) => void;
-  onUnblind: (id: number) => void;
-}
-
-const STATUS_STYLE: Record<ContentItem['status'], string> = {
-  VISIBLE: 'bg-emerald-50 text-emerald-600',
-  BLIND: 'bg-red-50 text-red-400',
-};
-
-const STATUS_LABEL: Record<ContentItem['status'], string> = {
-  VISIBLE: '게시중',
-  BLIND: '블라인드',
-};
+import type { ContentManagePanelProps } from '../types/admin-post-types';
+import { STATUS_LABEL, STATUS_STYLE } from '../constants/admin-posts-constants';
 
 export const ContentManagePanel = ({
   title,
