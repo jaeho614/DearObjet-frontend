@@ -17,6 +17,10 @@ import type {
   NoticeListResponse,
   NoticeUpdateRequest,
 } from '../admin-notices/types/admin-notices-types';
+import type {
+  AdminClassDetail,
+  AdminClassListResponse,
+} from '../admin-classes/types/admin-classes-types';
 
 export const adminApi = createApi({
   reducerPath: 'adminApi',
@@ -179,6 +183,51 @@ export const adminApi = createApi({
       }),
       invalidatesTags: ['AdminNotice'],
     }),
+
+    getAdminClasses: builder.query<
+      AdminClassListResponse,
+      { page: number; keyword?: string }
+    >({
+      query: ({ page, keyword }) => {
+        const params = new URLSearchParams({ page: String(page) });
+        if (keyword) params.set('keyword', keyword);
+        return `/api/v1/admin/classes?${params.toString()}`;
+      },
+      transformResponse: (res: ApiResponse<AdminClassListResponse>) => res.data,
+      providesTags: ['AdminClass'],
+    }),
+
+    getAdminClass: builder.query<AdminClassDetail, number>({
+      query: (classId) => `/api/v1/admin/classes/${classId}`,
+      transformResponse: (res: ApiResponse<AdminClassDetail>) => res.data,
+      providesTags: (result, error, classId) => [
+        { type: 'AdminClass', id: classId },
+      ],
+    }),
+
+    updateClassBlinded: builder.mutation<
+      AdminClassDetail,
+      { classId: number; blinded: boolean }
+    >({
+      query: ({ classId, blinded }) => ({
+        url: `/api/v1/admin/classes/${classId}/blind`,
+        method: 'PATCH',
+        body: { blinded },
+      }),
+      transformResponse: (res: ApiResponse<AdminClassDetail>) => res.data,
+      invalidatesTags: (result, error, { classId }) => [
+        { type: 'AdminClass', id: classId },
+        'AdminClass',
+      ],
+    }),
+
+    deleteAdminClass: builder.mutation<void, number>({
+      query: (classId) => ({
+        url: `/api/v1/admin/classes/${classId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['AdminClass'],
+    }),
   }),
 });
 
@@ -196,4 +245,8 @@ export const {
   useCreateAdminNoticeMutation,
   useUpdateAdminNoticeMutation,
   useDeleteAdminNoticeMutation,
+  useGetAdminClassesQuery,
+  useGetAdminClassQuery,
+  useUpdateClassBlindedMutation,
+  useDeleteAdminClassMutation,
 } = adminApi;
