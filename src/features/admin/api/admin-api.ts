@@ -21,6 +21,10 @@ import type {
   AdminClassDetail,
   AdminClassListResponse,
 } from '../admin-classes/types/admin-classes-types';
+import type {
+  AdminStoryDetail,
+  AdminStoryListResponse,
+} from '../admin-stories/types/admin-stories-types';
 
 export const adminApi = createApi({
   reducerPath: 'adminApi',
@@ -228,6 +232,51 @@ export const adminApi = createApi({
       }),
       invalidatesTags: ['AdminClass'],
     }),
+
+    getAdminStories: builder.query<
+      AdminStoryListResponse,
+      { page: number; keyword?: string }
+    >({
+      query: ({ page, keyword }) => {
+        const params = new URLSearchParams({ page: String(page) });
+        if (keyword) params.set('keyword', keyword);
+        return `/api/v1/admin/stories?${params.toString()}`;
+      },
+      transformResponse: (res: ApiResponse<AdminStoryListResponse>) => res.data,
+      providesTags: ['AdminStory'],
+    }),
+
+    getAdminStory: builder.query<AdminStoryDetail, number>({
+      query: (storyId) => `/api/v1/admin/stories/${storyId}`,
+      transformResponse: (res: ApiResponse<AdminStoryDetail>) => res.data,
+      providesTags: (result, error, storyId) => [
+        { type: 'AdminStory', id: storyId },
+      ],
+    }),
+
+    updateStoryBlinded: builder.mutation<
+      AdminStoryDetail,
+      { storyId: number; blinded: boolean }
+    >({
+      query: ({ storyId, blinded }) => ({
+        url: `/api/v1/admin/stories/${storyId}/blind`,
+        method: 'PATCH',
+        body: { blinded },
+      }),
+      transformResponse: (res: ApiResponse<AdminStoryDetail>) => res.data,
+      invalidatesTags: (result, error, { storyId }) => [
+        { type: 'AdminStory', id: storyId },
+        'AdminStory',
+      ],
+    }),
+
+    deleteAdminStory: builder.mutation<void, number>({
+      query: (storyId) => ({
+        url: `/api/v1/admin/stories/${storyId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['AdminStory'],
+    }),
   }),
 });
 
@@ -249,4 +298,8 @@ export const {
   useGetAdminClassQuery,
   useUpdateClassBlindedMutation,
   useDeleteAdminClassMutation,
+  useGetAdminStoriesQuery,
+  useGetAdminStoryQuery,
+  useUpdateStoryBlindedMutation,
+  useDeleteAdminStoryMutation,
 } = adminApi;
